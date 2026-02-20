@@ -1,2 +1,2 @@
-# -niversite-takip-formju-
+# üniversite takip formu
 üniversite

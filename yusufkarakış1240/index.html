@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Universite Takip Formu</title>
+
+<style>
+  body {
+    font-family: Arial;
+    margin: 0;
+    padding: 20px;
+    transition: 0.3s;
+    background: #f0f2f5;
+  }
+
+  .dark {
+    background: #1e1e1e;
+    color: white;
+  }
+
+  h1 {
+    text-align: center;
+  }
+
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  input, button {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+
+  button {
+    cursor: pointer;
+    border: none;
+  }
+
+  .ekle-btn {
+    background: #28a745;
+    color: white;
+  }
+
+  .sil {
+    background: #dc3545;
+    color: white;
+  }
+
+  .toggle {
+    background: #333;
+    color: white;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .dark table {
+    background: #2b2b2b;
+  }
+
+  th, td {
+    padding: 10px;
+    text-align: center;
+  }
+
+  th {
+    background: #007bff;
+    color: white;
+  }
+
+  .ortalama {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 20px;
+  }
+
+  .iyi { color: green; }
+  .orta { color: orange; }
+  .kotu { color: red; }
+
+</style>
+</head>
+
+<body>
+
+<h1>🎓 Universite Takip Formu</h1>
+
+<div class="top-bar">
+  <input type="text" id="arama" placeholder="🔍 Ders ara..." onkeyup="goster()">
+  <button class="toggle" onclick="temaDegistir()">🌙/☀️</button>
+</div>
+
+<div style="text-align:center;">
+  <input type="text" id="ders" placeholder="Ders adı">
+  <input type="date" id="tarih">
+  <input type="number" id="not" placeholder="Not">
+  <button class="ekle-btn" onclick="ekle()">Ekle</button>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Ders</th>
+      <th>Tarih</th>
+      <th>Not</th>
+      <th>İşlem</th>
+    </tr>
+  </thead>
+  <tbody id="liste"></tbody>
+</table>
+
+<div class="ortalama">
+  Ortalama: <span id="ortalama">0</span>
+</div>
+
+<script>
+
+let veriler = JSON.parse(localStorage.getItem("veriler")) || [];
+
+function kaydet() {
+  localStorage.setItem("veriler", JSON.stringify(veriler));
+}
+
+function ekle() {
+  let ders = document.getElementById("ders").value;
+  let tarih = document.getElementById("tarih").value;
+  let not = document.getElementById("not").value;
+
+  if (!ders || !tarih || !not) {
+    alert("Alanları doldur!");
+    return;
+  }
+
+  veriler.push({ ders, tarih, not: Number(not) });
+  kaydet();
+  goster();
+}
+
+function sil(i) {
+  veriler.splice(i, 1);
+  kaydet();
+  goster();
+}
+
+function ortalamaHesapla() {
+  if (veriler.length === 0) return 0;
+  let toplam = veriler.reduce((a, b) => a + b.not, 0);
+  return (toplam / veriler.length).toFixed(2);
+}
+
+function ortalamaRenk(ort) {
+  if (ort >= 80) return "iyi";
+  if (ort >= 50) return "orta";
+  return "kotu";
+}
+
+function goster() {
+  let filtre = document.getElementById("arama").value.toLowerCase();
+  let html = "";
+
+  veriler
+    .filter(v => v.ders.toLowerCase().includes(filtre))
+    .forEach((v, i) => {
+      html += `
+        <tr>
+          <td>${v.ders}</td>
+          <td>${v.tarih}</td>
+          <td>${v.not}</td>
+          <td><button class="sil" onclick="sil(${i})">Sil</button></td>
+        </tr>
+      `;
+    });
+
+  let ort = ortalamaHesapla();
+
+  document.getElementById("liste").innerHTML = html;
+  document.getElementById("ortalama").innerHTML =
+    `<span class="${ortalamaRenk(ort)}">${ort}</span>`;
+}
+
+function temaDegistir() {
+  document.body.classList.toggle("dark");
+}
+
+goster();
+
+</script>
+
+</body>
+</html>
